@@ -69,6 +69,7 @@ body {
 .message {
   font-size: clamp(14px, 4vw, 18px);
   color: var(--text-secondary);
+  text-wrap: balance;
 }
 
 .theme-selector {
