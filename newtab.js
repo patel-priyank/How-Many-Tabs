@@ -133,20 +133,12 @@ const todayKey = () => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-let lastMessage = '';
-
 const updateMessage = count => {
   const tier = MESSAGE_TIERS.find(tier => count <= tier.max);
   const variants = tier.messages;
+  const pick = variants[Math.floor(Math.random() * variants.length)];
 
-  const candidates = variants.length > 1 ? variants.filter(variant => variant(count) !== lastMessage) : variants;
-
-  const pick = candidates[Math.floor(Math.random() * candidates.length)];
-  const text = pick(count);
-
-  lastMessage = text;
-
-  document.getElementById('message').textContent = text;
+  document.getElementById('message').textContent = pick(count);
 };
 
 const incrementCount = () => {
