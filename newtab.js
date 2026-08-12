@@ -65,8 +65,8 @@ const incrementCount = () => {
     const newCount = countDate === key ? count + 1 : 1;
 
     chrome.storage.local.set({ countDate: key, count: newCount });
-
     document.getElementById('count').textContent = newCount;
+
     updateMessage(newCount);
   });
 };

@@ -7,7 +7,6 @@
     <script>
       (() => {
         const theme = localStorage.getItem('theme') || 'system';
-
         document.documentElement.setAttribute(
           'data-theme-active',
           theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
@@ -28,9 +27,9 @@
     </main>
 
     <div class="theme-selector" id="theme-selector">
-      <button data-theme="light" title="Light" aria-label="Light theme"></button>
-      <button data-theme="dark" title="Dark" aria-label="Dark theme"></button>
-      <button data-theme="system" title="System" aria-label="System theme"></button>
+      <button data-theme="light" title="Light theme" aria-label="Light theme"></button>
+      <button data-theme="dark" title="Dark theme" aria-label="Dark theme"></button>
+      <button data-theme="system" title="System theme" aria-label="System theme"></button>
     </div>
 
     <script src="icons.js"></script>
