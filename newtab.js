@@ -17,6 +17,7 @@ const applyTheme = theme => {
 
 const setTheme = theme => {
   chrome.storage.local.set({ theme });
+  localStorage.setItem('theme', theme);
   applyTheme(theme);
 };
 
