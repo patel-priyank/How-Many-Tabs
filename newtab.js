@@ -141,6 +141,25 @@ const updateMessage = count => {
   document.getElementById('message').textContent = pick(count);
 };
 
+const animateCount = (target, duration = 1000) => {
+  const start = performance.now();
+
+  const step = now => {
+    const elapsed = now - start;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 5);
+    const value = Math.round(eased * target);
+
+    document.getElementById('count').textContent = value;
+
+    if (progress < 1) {
+      requestAnimationFrame(step);
+    }
+  };
+
+  requestAnimationFrame(step);
+};
+
 const incrementCount = () => {
   const key = todayKey();
 
@@ -148,8 +167,8 @@ const incrementCount = () => {
     const newCount = countDate === key ? count + 1 : 1;
 
     chrome.storage.local.set({ countDate: key, count: newCount });
-    document.getElementById('count').textContent = newCount;
 
+    animateCount(newCount);
     updateMessage(newCount);
   });
 };
