@@ -1,0 +1,10 @@
+{
+  "manifest_version": 3,
+  "name": "How Many Tabs?",
+  "version": "1.0.0",
+  "description": "Counts how many times you've opened a new tab today.",
+  "permissions": ["storage"],
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  }
+}
