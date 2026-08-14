@@ -163,10 +163,13 @@ const animateCount = (target, duration = 1000) => {
 const incrementCount = () => {
   const key = todayKey();
 
-  chrome.storage.local.get(['countDate', 'count'], ({ countDate, count = 0 }) => {
-    const newCount = countDate === key ? count + 1 : 1;
+  chrome.storage.local.get(['countDate', 'count', 'history'], ({ countDate, count = 0, history = {} }) => {
+    const isNewDay = countDate !== key;
+    const newCount = isNewDay ? 1 : count + 1;
 
-    chrome.storage.local.set({ countDate: key, count: newCount });
+    const updatedHistory = isNewDay && countDate ? { ...history, [countDate]: count } : history;
+
+    chrome.storage.local.set({ countDate: key, count: newCount, history: updatedHistory });
 
     animateCount(newCount);
     updateMessage(newCount);
@@ -175,9 +178,169 @@ const incrementCount = () => {
 
 // #endregion
 
+// #region stats modal
+
+const openStatsModal = async () => {
+  console.log(await getStats());
+  renderCards(await getStats());
+  document.getElementById('stats-modal').showModal();
+};
+
+const closeStatsModal = () => {
+  document.getElementById('stats-modal').close();
+};
+
+const initStatsModal = () => {
+  document.getElementById('stats-trigger').addEventListener('click', openStatsModal);
+  document.getElementById('stats-close').addEventListener('click', closeStatsModal);
+};
+
+// #endregion
+
+// #region stats data
+
+const getDateKey = date => {
+  const yyyy = date.getFullYear();
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const dd = String(date.getDate()).padStart(2, '0');
+
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+const getLast30Days = history => {
+  const days = [];
+
+  for (let i = 29; i >= 0; i--) {
+    const date = new Date();
+    date.setDate(date.getDate() - i);
+
+    const key = getDateKey(date);
+
+    days.push({ date: key, count: history[key] ?? 0, weekday: date.getDay() });
+  }
+
+  return days;
+};
+
+const computeMovingAverage = (days, window = 7) => {
+  return days.map((day, i) => {
+    const start = Math.max(0, i - window + 1);
+    const slice = days.slice(start, i + 1);
+    const avg = slice.reduce((sum, d) => sum + d.count, 0) / slice.length;
+
+    return { date: day.date, average: avg };
+  });
+};
+
+const computeWeekdayAverages = days => {
+  const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+  return WEEKDAY_LABELS.map((label, weekday) => {
+    const matching = days.filter(d => d.weekday === weekday);
+    const total = matching.reduce((sum, d) => sum + d.count, 0);
+    const average = matching.length ? total / matching.length : 0;
+
+    return { label, average };
+  });
+};
+
+const daysBetween = (start, end) => Math.round((end - start) / (1000 * 60 * 60 * 24)) + 1;
+
+const getAllTimeStats = (history, todayCount, todayDateKey) => {
+  const merged = { ...history };
+
+  if (todayCount > 0) {
+    merged[todayDateKey] = todayCount;
+  }
+
+  const dates = Object.keys(merged).sort();
+
+  if (dates.length === 0) {
+    return { total: 0, average: 0, busiest: { date: todayDateKey, count: 0 }, streak: 0 };
+  }
+
+  const firstDate = new Date(dates[0]);
+  const today = new Date(todayDateKey);
+  const totalDays = daysBetween(firstDate, today);
+
+  const total = Object.values(merged).reduce((sum, count) => sum + count, 0);
+  const average = total / totalDays;
+
+  const busiestDate = dates.reduce((best, date) => (merged[date] > merged[best] ? date : best), dates[0]);
+  const busiest = { date: busiestDate, count: merged[busiestDate] };
+
+  let streak = 0;
+
+  const cursor = new Date(today);
+
+  while (true) {
+    const key = getDateKey(cursor);
+    const count = merged[key] ?? 0;
+
+    if (count === 0) {
+      break;
+    }
+
+    streak++;
+
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return { total, average, busiest, streak };
+};
+
+const getStats = () => {
+  return new Promise(resolve => {
+    chrome.storage.local.get(['history', 'count', 'countDate'], ({ history = {}, count = 0, countDate }) => {
+      const days = getLast30Days(history);
+      const today = days[days.length - 1];
+
+      if (countDate === today.date) {
+        today.count = count;
+      }
+
+      const allTime = getAllTimeStats(history, countDate === today.date ? count : 0, today.date);
+      const movingAverage = computeMovingAverage(days);
+      const weekdayAverages = computeWeekdayAverages(days);
+
+      resolve({ days, movingAverage, weekdayAverages, ...allTime });
+    });
+  });
+};
+
+// #endregion
+
+// #region stats render
+
+const formatCount = n => Math.round(n).toLocaleString();
+
+const renderCards = stats => {
+  const cards = [
+    { label: 'Total', value: formatCount(stats.total) },
+    { label: 'Average / day', value: formatCount(stats.average) },
+    { label: 'Busiest day', value: formatCount(stats.busiest.count) },
+    { label: 'Streak', value: `${stats.streak}d` }
+  ];
+
+  document.getElementById('stats-cards').innerHTML = cards
+    .map(
+      card => `
+        <div class="stats-card">
+          <div class="stats-card-value">${card.value}</div>
+          <div class="stats-card-label">${card.label}</div>
+        </div>
+      `
+    )
+    .join('');
+};
+
+// #endregion
+
 // #region icons
 
 const initIcons = () => {
+  document.getElementById('stats-trigger').innerHTML = ICONS.chart;
+  document.getElementById('stats-close').innerHTML = ICONS.close;
   document.querySelector('[data-theme="light"]').innerHTML = ICONS.sun;
   document.querySelector('[data-theme="dark"]').innerHTML = ICONS.moon;
   document.querySelector('[data-theme="system"]').innerHTML = ICONS.monitor;
@@ -189,6 +352,7 @@ const initIcons = () => {
 
 initIcons();
 initTheme();
+initStatsModal();
 incrementCount();
 
 // #endregion

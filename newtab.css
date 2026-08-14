@@ -40,8 +40,8 @@ body {
   font-family: 'Geist', sans-serif;
   background-color: var(--bg);
   color: var(--text);
-  height: 100vh;
   width: 100vw;
+  height: 100vh;
   overflow: hidden;
   font-variant-numeric: tabular-nums;
   transition-property: color, background-color;
@@ -75,8 +75,9 @@ body {
 .theme-selector {
   position: fixed;
   bottom: 16px;
-  right: 16px;
+  left: 16px;
   display: flex;
+  align-items: center;
   gap: 4px;
 
   & button {
@@ -108,4 +109,178 @@ body {
       background-color: var(--text-secondary);
     }
   }
+}
+
+.stats-trigger {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition-property: color, background-color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+
+  & svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  &:hover {
+    color: var(--text);
+    background-color: color-mix(in srgb, var(--text-secondary) 15%, transparent);
+  }
+}
+
+.stats-modal {
+  outline: none;
+  border: none;
+  padding: 64px 16px 16px;
+  width: 100vw;
+  height: 100vh;
+  max-width: 100%;
+  max-height: 100%;
+  background-color: color-mix(in srgb, var(--bg) 85%, var(--text));
+  color: var(--text);
+  opacity: 0;
+  scale: 0.99;
+  transition-property: opacity, scale, display, overlay;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+  transition-behavior: normal, normal, allow-discrete, allow-discrete;
+
+  &::backdrop {
+    background-color: var(--bg);
+    opacity: 0;
+    transition-property: opacity, display, overlay;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+    transition-behavior: normal, allow-discrete, allow-discrete;
+  }
+
+  &[open] {
+    opacity: 1;
+    scale: 1;
+
+    @starting-style {
+      opacity: 0;
+      scale: 0.99;
+    }
+
+    &::backdrop {
+      opacity: 1;
+
+      @starting-style {
+        opacity: 0;
+      }
+    }
+  }
+}
+
+.stats-actions {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  & button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-radius: 6px;
+    transition-property: color, background-color;
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+
+    &:hover {
+      color: var(--text);
+      background-color: color-mix(in srgb, var(--text-secondary) 15%, transparent);
+    }
+  }
+
+  & .stats-reset,
+  & .stats-export {
+    font-family: 'Geist', sans-serif;
+    font-size: 13px;
+    padding: 6px 9px;
+  }
+
+  & .stats-close {
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    & svg {
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.stats-container {
+  max-width: 1024px;
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+
+  @media (width < 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (width < 640px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.stats-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: color-mix(in srgb, var(--text-secondary) 15%, transparent);
+  text-align: center;
+}
+
+.stats-card-value {
+  font-size: clamp(18px, 5vw, 28px);
+  font-weight: 700;
+  line-height: 1;
+}
+
+.stats-card-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* TODO */
+.stats-chart {
+  min-height: 160px;
+  border: 1px dashed var(--text-secondary);
+  border-radius: 8px;
+}
+
+/* TODO */
+.stats-weekday {
+  min-height: 60px;
+  border: 1px dashed var(--text-secondary);
+  border-radius: 8px;
 }
