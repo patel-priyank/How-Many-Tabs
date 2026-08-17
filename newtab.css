@@ -154,8 +154,8 @@ body {
   background-color: var(--surface);
   color: var(--text);
   opacity: 0;
-  scale: 0.99;
-  transition-property: opacity, scale, display, overlay;
+  transform: translateY(8px);
+  transition-property: opacity, transform, display, overlay;
   transition-duration: 0.2s;
   transition-timing-function: ease;
   transition-behavior: normal, normal, allow-discrete, allow-discrete;
@@ -171,11 +171,11 @@ body {
 
   &[open] {
     opacity: 1;
-    scale: 1;
+    transform: translateY(0);
 
     @starting-style {
       opacity: 0;
-      scale: 0.99;
+      transform: translateY(8px);
     }
 
     &::backdrop {
