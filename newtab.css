@@ -293,7 +293,7 @@ body {
 
 .stats-bar-track {
   display: flex;
-  gap: 4px;
+  gap: 2px;
   overflow-x: auto;
 }
 
@@ -312,7 +312,7 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  gap: 6px;
+  gap: 4px;
   height: 100%;
 }
 
