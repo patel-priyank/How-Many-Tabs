@@ -112,7 +112,7 @@ const MESSAGE_TIERS = [
     ]
   },
   {
-    max: Infinity,
+    max: Number.MAX_SAFE_INTEGER,
     messages: [
       count => `${count} tabs, deep into triple digits`,
       count => `${count} new tabs today`,
@@ -181,9 +181,20 @@ const incrementCount = () => {
 // #region stats modal
 
 const openStatsModal = async () => {
-  console.log(await getStats());
-  renderCards(await getStats());
+  const stats = await getStats();
+
+  renderCards(stats);
+  render4WeeksChart(stats);
+  renderWeekdaysChart(stats);
+
   document.getElementById('stats-modal').showModal();
+
+  document.querySelectorAll('.stats-bar-track').forEach(track =>
+    track.scroll({
+      left: Number.MAX_SAFE_INTEGER,
+      behavior: 'smooth'
+    })
+  );
 };
 
 const closeStatsModal = () => {
@@ -207,10 +218,17 @@ const getDateKey = date => {
   return `${yyyy}-${mm}-${dd}`;
 };
 
-const getLast30Days = history => {
+const formatShortDate = dateKey => {
+  const [, month, day] = dateKey.split('-');
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  return `${MONTHS[Number(month) - 1]} ${String(day).padStart(2, '0')}`;
+};
+
+const getLast4Weeks = history => {
   const days = [];
 
-  for (let i = 29; i >= 0; i--) {
+  for (let i = 27; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
 
@@ -292,7 +310,7 @@ const getAllTimeStats = (history, todayCount, todayDateKey) => {
 const getStats = () => {
   return new Promise(resolve => {
     chrome.storage.local.get(['history', 'count', 'countDate'], ({ history = {}, count = 0, countDate }) => {
-      const days = getLast30Days(history);
+      const days = getLast4Weeks(history);
       const today = days[days.length - 1];
 
       if (countDate === today.date) {
@@ -332,6 +350,53 @@ const renderCards = stats => {
       `
     )
     .join('');
+};
+
+const render4WeeksChart = stats => {
+  const maxCount = Math.max(...stats.days.map(d => d.count), 1);
+
+  const bars = stats.days
+    .map((day, i) => {
+      const heightPct = (day.count / maxCount) * 100;
+      const label = (i + 1) % 2 ? '·' : formatShortDate(day.date);
+
+      return `
+        <div class="stats-bar-wrapper">
+          <div class="stats-bar-value">${day.count}</div>
+          <div class="stats-bar" style="height: ${heightPct}%"></div>
+          <div class="stats-bar-label">${label}</div>
+        </div>
+      `;
+    })
+    .join('');
+
+  document.getElementById('stats-chart-4-weeks').innerHTML = `
+    <div class="stats-bar-track">${bars}</div>
+    <div class="stats-chart-title">Last 4 weeks</div>
+  `;
+};
+
+const renderWeekdaysChart = stats => {
+  const maxAvg = Math.max(...stats.weekdayAverages.map(d => d.average), 1);
+
+  const bars = stats.weekdayAverages
+    .map(day => {
+      const heightPct = (day.average / maxAvg) * 100;
+
+      return `
+        <div class="stats-bar-wrapper">
+          <div class="stats-bar-value">${formatCount(day.average)}</div>
+          <div class="stats-bar" style="height: ${heightPct}%"></div>
+          <div class="stats-bar-label">${day.label}</div>
+        </div>
+      `;
+    })
+    .join('');
+
+  document.getElementById('stats-chart-weekdays').innerHTML = `
+    <div class="stats-bar-track">${bars}</div>
+    <div class="stats-chart-title">Average by weekday</div>
+  `;
 };
 
 // #endregion
