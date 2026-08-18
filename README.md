@@ -7,14 +7,15 @@ A minimal Chrome extension that replaces your new tab page with a simple counter
 - **Daily tab count** — tracks how many new tabs you've opened today, resets automatically at the start of a new day.
 - **Refresh-aware counting** — refreshing the new tab page counts too, not just opening new ones.
 - **Theme selector** — switch between light, dark, and system themes, with the choice persisted across sessions.
+- **View your stats** - daily history, streaks, busiest day, and a weekday breakdown.
 
 ## Privacy Policy
 
-_Last updated: August 13, 2026_
+_Last updated: August 18, 2026_
 
 How Many Tabs? does not collect, transmit, or share any user data.
 
-- **What's stored:** the extension saves your daily tab count and theme preference using Chrome's local storage (`chrome.storage.local`).
+- **What's stored:** the extension saves your daily tab count, historical tab counts, and theme preference using Chrome's local storage (`chrome.storage.local`).
 - **Where it stays:** this data lives entirely on your device. It is never sent to a server, developer, or third party of any kind.
 - **No tracking:** the extension does not use analytics, cookies, or any form of tracking.
 - **No network requests:** How Many Tabs? does not make any network calls. It only reads and writes to local storage.
