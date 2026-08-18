@@ -7,7 +7,7 @@ A minimal Chrome extension that replaces your new tab page with a simple counter
 - **Daily tab count** — tracks how many new tabs you've opened today, resets automatically at the start of a new day.
 - **Refresh-aware counting** — refreshing the new tab page counts too, not just opening new ones.
 - **Theme selector** — switch between light, dark, and system themes, with the choice persisted across sessions.
-- **View your stats** - daily history, streaks, busiest day, and a weekday breakdown.
+- **View your stats** — daily history, streaks, busiest day, and a weekday breakdown.
 
 ## Privacy Policy
 
